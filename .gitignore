@@ -131,3 +131,7 @@ dist
 
 .DS_Store
 thumbs.db
+
+# --- demo rig ---
+.tmp/
+sdks/
