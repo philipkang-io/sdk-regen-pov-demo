@@ -218,7 +218,5 @@ export class PaymentsService extends BaseService {
   }
   // ==== END CUSTOM CODE ================================================
 
-  /** Second marker, landed via a MERGE COMMIT rather than a squash. */
-  static mergeCommitMarker(): string { return 'preserved-via-merge-commit'; }
 
 }
