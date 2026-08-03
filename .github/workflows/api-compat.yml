@@ -1,0 +1,105 @@
+name: API compatibility gate
+
+# Push on every branch, deliberately. The check attaches to the commit SHA,
+# so a pull request inherits it — one run, not two. Adding a pull_request
+# trigger as well would double every run for no extra signal.
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  SPEC: spec/payments-api.yaml
+  OASDIFF_VERSION: 1.27.0
+
+jobs:
+  breaking-changes:
+    name: Detect breaking API changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install oasdiff
+        run: |
+          set -euo pipefail
+          url="https://github.com/oasdiff/oasdiff/releases/download/v${OASDIFF_VERSION}/oasdiff_${OASDIFF_VERSION}_linux_amd64.tar.gz"
+          curl -sSfL "$url" | tar xz -C /usr/local/bin oasdiff
+          oasdiff --version
+
+      - name: Resolve the baseline spec
+        id: baseline
+        run: |
+          set -euo pipefail
+          default="${{ github.event.repository.default_branch }}"
+          git fetch --quiet origin "$default" || true
+
+          # On a branch: compare against the default branch.
+          # On the default branch: compare against the previous commit.
+          if [ "${{ github.ref_name }}" = "$default" ]; then
+            ref="HEAD~1"
+          else
+            ref="origin/$default"
+          fi
+
+          if git show "$ref:$SPEC" > /tmp/base-spec.yaml 2>/dev/null; then
+            echo "resolved=true"  >> "$GITHUB_OUTPUT"
+            echo "ref=$ref"       >> "$GITHUB_OUTPUT"
+            echo "Baseline: $ref:$SPEC"
+          else
+            echo "resolved=false" >> "$GITHUB_OUTPUT"
+            echo "No baseline at $ref:$SPEC — first commit of this spec."
+          fi
+
+      # ------------------------------------------------------------------
+      # The guard. A gate that silently compares nothing and exits 0 is
+      # worse than no gate: it reports green while doing no work. Every
+      # precondition is asserted explicitly before oasdiff is trusted.
+      # ------------------------------------------------------------------
+      - name: Guard — refuse to pass on zero work
+        if: steps.baseline.outputs.resolved == 'true'
+        run: |
+          set -euo pipefail
+          fail() { echo "::error::GUARD: $1"; exit 1; }
+
+          [ -f "$SPEC" ]            || fail "head spec $SPEC is missing"
+          [ -s "$SPEC" ]            || fail "head spec $SPEC is empty"
+          [ -s /tmp/base-spec.yaml ] || fail "baseline spec resolved but is empty"
+
+          # Both sides must parse as OpenAPI, or the comparison is meaningless.
+          pip install --quiet pyyaml
+          for f in "$SPEC" /tmp/base-spec.yaml; do
+            python3 .github/scripts/assert_openapi.py "$f" || fail "$f is not usable OpenAPI"
+          done
+          echo "Guard passed — there is real work to compare."
+
+      - name: Breaking-change check
+        if: steps.baseline.outputs.resolved == 'true'
+        run: |
+          set -euo pipefail
+          echo "### API compatibility" >> "$GITHUB_STEP_SUMMARY"
+          echo "Comparing \`${{ steps.baseline.outputs.ref }}\` → \`${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          oasdiff breaking /tmp/base-spec.yaml "$SPEC" --format text 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+          # --fail-on ERR: errors block, warnings do not.
+          #
+          # That split is a policy choice, not a tool default. Adding an enum
+          # value to a RESPONSE is classified WARN here — real risk to clients
+          # that do not tolerate unknown values, but not something we block a
+          # merge on. Adding a variant to a response oneOf is ERR. Move the
+          # line by changing this flag, not by editing the spec to dodge it.
+          oasdiff breaking /tmp/base-spec.yaml "$SPEC" --fail-on ERR
+
+      - name: No baseline — nothing to compare
+        if: steps.baseline.outputs.resolved != 'true'
+        run: |
+          echo "::notice::No baseline spec found; skipping the compatibility check."
+          echo "This is expected only on the very first commit of the spec."

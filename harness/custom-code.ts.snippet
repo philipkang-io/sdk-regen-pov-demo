@@ -1,0 +1,40 @@
+
+  // ==== CUSTOM CODE — hand-written, not generated ======================
+  // Everything between these markers is the developer's own work. The
+  // point of the harness is that it is still here, and still compiling,
+  // after the spec has changed underneath it N times.
+
+  /**
+   * Convenience helper: create a payment and return the settled record.
+   * Chains createPayment with a follow-up getPayment, so callers get the
+   * current state rather than the initial 201 body.
+   */
+  async createAndFetchPayment(
+    body: CreatePaymentRequest,
+    requestConfig?: Partial<SdkConfig>,
+  ): Promise<Payment> {
+    const created = await this.createPayment(body, requestConfig);
+    return this.getPayment(created.id, requestConfig);
+  }
+
+  /**
+   * Domain helper over the discriminated union. Deliberately touches the
+   * polymorphic type, so a union change (mutation m04 adds a fourth
+   * variant) exercises this code path too.
+   */
+  static describeInstrument(instrument: Payment['instrument']): string {
+    const i = instrument as { instrumentType?: string };
+    switch (i?.instrumentType) {
+      case 'card':
+        return 'card';
+      case 'bank_transfer':
+        return 'bank transfer';
+      case 'wallet':
+        return 'wallet';
+      default:
+        // New variants land here rather than throwing — forward-compatible
+        // by construction, which is the behaviour we want to preserve.
+        return `other (${i?.instrumentType ?? 'unknown'})`;
+    }
+  }
+  // ==== END CUSTOM CODE ================================================

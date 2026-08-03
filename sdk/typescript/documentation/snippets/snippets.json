@@ -1,0 +1,21 @@
+{
+  "endpoints": {
+    "/payments": {
+      "get": "import { PaymentsApi } from 'payments-api';\n\n(async () => {\n  const paymentsApi = new PaymentsApi({\n\ttoken: 'YOUR_TOKEN',\n});\n\nconst paymentStatus = \"pending\"\n\n  const data = await paymentsApi.payments.listPayments({\n    status: paymentStatus,\n      limit: 25,\n      cursor: \"cursor\",\n  });\n\n  console.log(data);\n})();\n",
+      "post": "import { CardInstrument, CreatePaymentRequest, Money, PaymentsApi } from 'payments-api';\n\n(async () => {\n  const paymentsApi = new PaymentsApi({\n\ttoken: 'YOUR_TOKEN',\n});\n\n  const currency = \"USD\"\n  \n  const money: Money = {\t\n    amountMinor: 8,\n    currency: currency\n  };\n  \n  const cardInstrumentInstrumentType = \"card\"\n  \n  const cardBrand = \"visa\"\n  \n  const cardInstrument: CardInstrument = {\t\n    instrumentType: cardInstrumentInstrumentType,\n    last4: \"eu e\",\n    brand: cardBrand,\n    expiryMonth: 4,\n    expiryYear: 123,\n    holderName: \"holderName\"\n  };;\n  \n  const createPaymentRequest: CreatePaymentRequest = {\t\n    amount: money,\n    instrument: cardInstrument,\n    description: \"description\",\n    idempotencyKey: \"idempotencyKey\"\n  };\n\n  const data = await paymentsApi.payments.createPayment(createPaymentRequest);\n\n  console.log(data);\n})();\n"
+    },
+    "/payments/{paymentId}": {
+      "get": "import { PaymentsApi } from 'payments-api';\n\n(async () => {\n  const paymentsApi = new PaymentsApi({\n\ttoken: 'YOUR_TOKEN',\n});\n\n  const data = await paymentsApi.payments.getPayment(\"paymentId\");\n\n  console.log(data);\n})();\n"
+    },
+    "/payments/{paymentId}/refunds": {
+      "post": "import { CreateRefundRequest, Money, PaymentsApi } from 'payments-api';\n\n(async () => {\n  const paymentsApi = new PaymentsApi({\n\ttoken: 'YOUR_TOKEN',\n});\n\n  const currency = \"USD\"\n  \n  const money: Money = {\t\n    amountMinor: 8,\n    currency: currency\n  };\n  \n  const createRefundRequest: CreateRefundRequest = {\t\n    amount: money,\n    reason: \"reason\"\n  };\n\n  const data = await paymentsApi.refunds.refundPayment(\n  \"paymentId\",\n  createRefundRequest\n);\n\n  console.log(data);\n})();\n"
+    }
+  },
+  "example": "import { PaymentsApi } from 'payments-api';\n\n(async () => {\n  const paymentsApi = new PaymentsApi({\n\ttoken: 'YOUR_TOKEN',\n});\n\nconst paymentStatus = \"pending\"\n\n  const data = await paymentsApi.payments.listPayments({\n    status: paymentStatus,\n      limit: 25,\n      cursor: \"cursor\",\n  });\n\n  console.log(data);\n})();\n",
+  "authentication": {
+    "bearer": {
+      "constructor": "const sdk = new PaymentsApi({ token: 'YOUR_TOKEN' });",
+      "setter": "const sdk = new PaymentsApi();\nsdk.token = 'YOUR_TOKEN';"
+    }
+  }
+}
