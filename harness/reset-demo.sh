@@ -70,14 +70,24 @@ STRAY=$(grep -c 'mergeCommitMarker' src/services/payments/payments-service.ts 2>
 echo
 echo "4. Standing pull requests (Beat 5 shows these — do NOT merge them)"
 for n in 1 2; do
-  info=$(gh pr view "$n" --json state,mergeStateStatus,title -q '"\(.state) \(.mergeStateStatus) \(.title)"' 2>/dev/null)
-  case "$n:$info" in
-    1:OPEN\ BLOCKED*) g "   PR #1 OPEN / BLOCKED  — breaking change, correct" ;;
-    2:OPEN\ CLEAN*)   g "   PR #2 OPEN / CLEAN    — additive change, correct" ;;
-    *) r "   PR #$n unexpected: $info"
-       d "        expected: #1 OPEN/BLOCKED, #2 OPEN/CLEAN"
-       d "        if merged or closed, recreate from branches breaking-change / additive-change" ;;
-  esac
+  # mergeStateStatus goes UNKNOWN while GitHub recomputes after main moves.
+  # Poll briefly, then fall back to the check conclusion, which is stable.
+  for _ in 1 2 3; do
+    st=$(gh pr view "$n" --json state -q .state 2>/dev/null)
+    ms=$(gh pr view "$n" --json mergeStateStatus -q .mergeStateStatus 2>/dev/null)
+    [ "$ms" != "UNKNOWN" ] && break
+    sleep 4
+  done
+  ck=$(gh pr view "$n" --json statusCheckRollup -q '.statusCheckRollup[0].conclusion' 2>/dev/null)
+  want_ck=$([ "$n" = 1 ] && echo FAILURE || echo SUCCESS)
+  if [ "$st" = OPEN ] && [ "$ck" = "$want_ck" ]; then
+    label=$([ "$n" = 1 ] && echo "breaking change, gate red" || echo "additive change, gate green")
+    g "   PR #$n OPEN, check=$ck  — $label"
+    [ "$ms" = UNKNOWN ] && d "        (mergeability still recomputing; harmless)"
+  else
+    r "   PR #$n unexpected: state=$st check=$ck (wanted OPEN / $want_ck)"
+    d "        recreate from branch $([ "$n" = 1 ] && echo breaking-change || echo additive-change)"
+  fi
 done
 
 # ---------------------------------------------------------------- 5
