@@ -56,14 +56,16 @@ fi
 echo
 echo "3. Git state"
 git checkout -q main && git pull -q
-CUSTOM=$(grep -c 'describeInstrument' src/services/payments/payments-service.ts 2>/dev/null || echo 0)
+# grep -c prints 0 AND exits 1 when there are no matches, so `|| echo 0`
+# would emit "0\n0" and break the numeric test. Swallow the status instead.
+CUSTOM=$(grep -c 'describeInstrument' src/services/payments/payments-service.ts 2>/dev/null); CUSTOM=${CUSTOM:-0}
 if [ "$CUSTOM" -ge 1 ]; then
   g "   custom code present on main at src/services/payments/payments-service.ts"
 else
   r "   CUSTOM CODE MISSING on main. Beat 6 has nothing to preserve, and Beat 4's"
   r "   framing breaks. Re-add it from harness/custom-code.ts.snippet via a PR."
 fi
-STRAY=$(grep -c 'mergeCommitMarker' src/services/payments/payments-service.ts 2>/dev/null || echo 0)
+STRAY=$(grep -c 'mergeCommitMarker' src/services/payments/payments-service.ts 2>/dev/null); STRAY=${STRAY:-0}
 [ "$STRAY" -gt 0 ] && y "   note: test marker 'mergeCommitMarker' still present — cosmetic only"
 
 # ---------------------------------------------------------------- 4
