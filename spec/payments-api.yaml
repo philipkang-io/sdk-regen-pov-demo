@@ -1,58 +1,75 @@
 openapi: 3.0.3
 info:
   title: Payments API
-  version: 1.0.0
-  description: >-
-    Reference payments API used to demonstrate SDK generation and
-    regeneration safety. Deliberately includes a discriminated union
-    (paymentInstrument) because polymorphism is where SDK generators
-    most often fail.
+  version: 1.13.0
+  description: Reference payments API used to demonstrate SDK generation and regeneration safety. Deliberately includes a discriminated union (paymentInstrument) because polymorphism is where SDK generators most often fail.
   license:
     name: Apache-2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
+  x-mutation-log:
+  - 'm01: add optional field to Payment'
+  - 'm02: add GET /refunds/{refundId}'
+  - 'm03: widen CardBrand enum'
+  - 'm04: add 4th variant to the payment-instrument union'
+  - 'm05: deprecate Payment.description'
+  - 'm06: reword descriptions only'
+  - 'm07: add nested RiskAssessment object'
+  - 'm08: widen PaymentStatus enum'
+  - 'm09: add 429 response to createPayment'
+  - 'm10: add createdAfter query param'
+  - 'm11: add X-Request-Id header param'
+  - 'm12: add second discriminated union + /payouts'
+  - 'BREAKING: CreatePaymentRequest.description optional -> required'
 servers:
-  - url: https://api.paycrest.io/v1
-    description: Production
-
+- url: https://api.paycrest.io/v1
+  description: Production
 security:
-  - bearerAuth: []
-
+- bearerAuth: []
 tags:
-  - name: Payments
-    description: Create and retrieve payments
-  - name: Refunds
-    description: Refund previously captured payments
-
+- name: Payments
+  description: Create and retrieve payments
+- name: Refunds
+  description: Refund previously captured payments
+- name: Payouts
+  description: Send funds out
 paths:
   /payments:
     get:
-      tags: [Payments]
+      tags:
+      - Payments
       operationId: listPayments
       summary: List payments
-      description: Returns a page of payments, most recent first.
+      description: Returns a page of payments, most recent first. Results are scoped to the authenticated merchant.
       parameters:
-        - name: status
-          in: query
-          required: false
-          description: Filter by payment status.
-          schema:
-            $ref: '#/components/schemas/PaymentStatus'
-        - name: limit
-          in: query
-          required: false
-          description: Maximum number of payments to return.
-          schema:
-            type: integer
-            format: int32
-            minimum: 1
-            maximum: 100
-            default: 25
-        - name: cursor
-          in: query
-          required: false
-          description: Opaque pagination cursor returned by a previous call.
-          schema:
-            type: string
+      - name: status
+        in: query
+        required: false
+        description: Filter by payment status.
+        schema:
+          $ref: '#/components/schemas/PaymentStatus'
+      - name: limit
+        in: query
+        required: false
+        description: Maximum number of payments to return.
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100
+          default: 25
+      - name: cursor
+        in: query
+        required: false
+        description: Opaque pagination cursor returned by a previous call.
+        schema:
+          type: string
+      - name: createdAfter
+        in: query
+        required: false
+        description: Only return payments created at or after this time.
+        schema:
+          type: string
+          format: date-time
       responses:
         '200':
           description: A page of payments.
@@ -63,12 +80,11 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
     post:
-      tags: [Payments]
+      tags:
+      - Payments
       operationId: createPayment
       summary: Create a payment
-      description: >-
-        Creates and attempts to authorize a payment against the supplied
-        payment instrument.
+      description: Creates and attempts to authorize a payment against the supplied payment instrument.
       requestBody:
         required: true
         content:
@@ -90,17 +106,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
-  /payments/{paymentId}:
-    parameters:
-      - name: paymentId
-        in: path
-        required: true
-        description: Identifier of the payment.
+        '429':
+          description: Rate limit exceeded for this merchant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: X-Request-Id
+        in: header
+        required: false
+        description: Client-generated request identifier, echoed in logs.
         schema:
           type: string
+  /payments/{paymentId}:
+    parameters:
+    - name: paymentId
+      in: path
+      required: true
+      description: Identifier of the payment.
+      schema:
+        type: string
     get:
-      tags: [Payments]
+      tags:
+      - Payments
       operationId: getPayment
       summary: Retrieve a payment
       responses:
@@ -112,22 +141,20 @@ paths:
                 $ref: '#/components/schemas/Payment'
         '404':
           $ref: '#/components/responses/NotFound'
-
   /payments/{paymentId}/refunds:
     parameters:
-      - name: paymentId
-        in: path
-        required: true
-        description: Identifier of the payment being refunded.
-        schema:
-          type: string
+    - name: paymentId
+      in: path
+      required: true
+      description: Identifier of the payment being refunded.
+      schema:
+        type: string
     post:
-      tags: [Refunds]
+      tags:
+      - Refunds
       operationId: refundPayment
       summary: Refund a payment
-      description: >-
-        Refunds all or part of a captured payment. Partial refunds are
-        permitted up to the captured amount.
+      description: Refunds all or part of a captured payment. Partial refunds are permitted up to the captured amount.
       requestBody:
         required: true
         content:
@@ -149,17 +176,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+  /refunds/{refundId}:
+    parameters:
+    - name: refundId
+      in: path
+      required: true
+      description: Identifier of the refund.
+      schema:
+        type: string
+    get:
+      tags:
+      - Refunds
+      operationId: getRefund
+      summary: Retrieve a refund
+      responses:
+        '200':
+          description: The requested refund.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refund'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /payouts:
+    post:
+      tags:
+      - Payouts
+      operationId: createPayout
+      summary: Create a payout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePayoutRequest'
+      responses:
+        '201':
+          description: The created payout.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payout'
+        '400':
+          $ref: '#/components/responses/BadRequest'
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: >-
-        Merchant API token issued from the dashboard. Sent as
-        `Authorization: Bearer <token>`.
-
+      description: 'Merchant API token issued from the dashboard. Sent as `Authorization: Bearer <token>`.'
   responses:
     BadRequest:
       description: The request was malformed.
@@ -173,37 +239,34 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-
   schemas:
-    # ------------------------------------------------------------------
-    # The discriminated union. This is the part of the spec that matters
-    # most for the demo: Jeremy asked specifically for polymorphism.
-    # ------------------------------------------------------------------
-    # NOTE: no `type: object` here, deliberately. Declaring `type` alongside
-    # `oneOf` makes the Postman TypeScript generator emit `z.any()` and drop
-    # every variant model — silently, with no warning. Verified 2026-08-02.
     PaymentInstrument:
-      description: >-
-        A means of payment. The concrete shape is selected by the
-        instrumentType discriminator.
+      description: A means of payment. The concrete shape is selected by the instrumentType discriminator.
       oneOf:
-        - $ref: '#/components/schemas/CardInstrument'
-        - $ref: '#/components/schemas/BankTransferInstrument'
-        - $ref: '#/components/schemas/WalletInstrument'
+      - $ref: '#/components/schemas/CardInstrument'
+      - $ref: '#/components/schemas/BankTransferInstrument'
+      - $ref: '#/components/schemas/WalletInstrument'
+      - $ref: '#/components/schemas/CryptoInstrument'
       discriminator:
         propertyName: instrumentType
         mapping:
           card: '#/components/schemas/CardInstrument'
           bank_transfer: '#/components/schemas/BankTransferInstrument'
           wallet: '#/components/schemas/WalletInstrument'
-
+          crypto: '#/components/schemas/CryptoInstrument'
     CardInstrument:
       type: object
-      required: [instrumentType, last4, brand, expiryMonth, expiryYear]
+      required:
+      - instrumentType
+      - last4
+      - brand
+      - expiryMonth
+      - expiryYear
       properties:
         instrumentType:
           type: string
-          enum: [card]
+          enum:
+          - card
         last4:
           type: string
           description: Last four digits of the card number.
@@ -223,14 +286,17 @@ components:
           type: string
           nullable: true
           description: Cardholder name as printed. Absent for tokenized cards.
-
     BankTransferInstrument:
       type: object
-      required: [instrumentType, accountLast4, bankName]
+      required:
+      - instrumentType
+      - accountLast4
+      - bankName
       properties:
         instrumentType:
           type: string
-          enum: [bank_transfer]
+          enum:
+          - bank_transfer
         accountLast4:
           type: string
           minLength: 4
@@ -241,61 +307,71 @@ components:
           type: string
           nullable: true
           description: Direct-debit mandate reference, when one exists.
-
     WalletInstrument:
       type: object
-      required: [instrumentType, provider]
+      required:
+      - instrumentType
+      - provider
       properties:
         instrumentType:
           type: string
-          enum: [wallet]
+          enum:
+          - wallet
         provider:
           $ref: '#/components/schemas/WalletProvider'
         accountHandle:
           type: string
           nullable: true
           description: Masked wallet account handle.
-
-    # ------------------------------------------------------------------
-    # Enums. Widened by later mutations.
-    # ------------------------------------------------------------------
     CardBrand:
       type: string
       description: Card network.
-      enum: [visa, mastercard, amex]
-
+      enum:
+      - visa
+      - mastercard
+      - amex
+      - discover
     WalletProvider:
       type: string
       description: Wallet provider.
-      enum: [apple_pay, google_pay]
-
+      enum:
+      - apple_pay
+      - google_pay
     PaymentStatus:
       type: string
       description: Lifecycle state of a payment.
-      enum: [pending, authorized, captured, failed]
-
+      enum:
+      - pending
+      - authorized
+      - captured
+      - failed
+      - refunded
+      - partially_refunded
     Currency:
       type: string
       description: ISO 4217 currency code.
-      enum: [USD, EUR, GBP]
-
-    # ------------------------------------------------------------------
-    # Core resources
-    # ------------------------------------------------------------------
+      enum:
+      - USD
+      - EUR
+      - GBP
     Money:
       type: object
-      required: [amountMinor, currency]
+      required:
+      - amountMinor
+      - currency
       properties:
         amountMinor:
           type: integer
           format: int64
-          description: Amount in the minor unit of the currency (e.g. cents).
+          description: Amount in the minor unit of the currency. For USD this is cents.
         currency:
           $ref: '#/components/schemas/Currency'
-
     CreatePaymentRequest:
       type: object
-      required: [amount, instrument]
+      required:
+      - amount
+      - instrument
+      - description
       properties:
         amount:
           $ref: '#/components/schemas/Money'
@@ -307,10 +383,14 @@ components:
         idempotencyKey:
           type: string
           description: Client-supplied key to make retries safe.
-
     Payment:
       type: object
-      required: [id, status, amount, instrument, createdAt]
+      required:
+      - id
+      - status
+      - amount
+      - instrument
+      - createdAt
       properties:
         id:
           type: string
@@ -323,6 +403,8 @@ components:
         description:
           type: string
           nullable: true
+          deprecated: true
+          description: Deprecated. Use merchantReference instead.
         createdAt:
           type: string
           format: date-time
@@ -331,10 +413,20 @@ components:
           format: date-time
           nullable: true
           description: When the payment was captured. Null until capture.
-
+        merchantReference:
+          type: string
+          nullable: true
+          description: Merchant's own reference for this payment.
+        risk:
+          type: object
+          nullable: true
+          allOf:
+          - $ref: '#/components/schemas/RiskAssessment'
+          description: Risk assessment, when scoring ran.
     PaymentPage:
       type: object
-      required: [data]
+      required:
+      - data
       properties:
         data:
           type: array
@@ -344,20 +436,23 @@ components:
           type: string
           nullable: true
           description: Cursor for the next page, or null on the last page.
-
     CreateRefundRequest:
       type: object
-      required: [amount]
+      required:
+      - amount
       properties:
         amount:
           $ref: '#/components/schemas/Money'
         reason:
           type: string
           description: Operator-supplied reason for the refund.
-
     Refund:
       type: object
-      required: [id, paymentId, amount, createdAt]
+      required:
+      - id
+      - paymentId
+      - amount
+      - createdAt
       properties:
         id:
           type: string
@@ -371,10 +466,11 @@ components:
         createdAt:
           type: string
           format: date-time
-
     Error:
       type: object
-      required: [code, message]
+      required:
+      - code
+      - message
       properties:
         code:
           type: string
@@ -385,3 +481,105 @@ components:
         details:
           type: string
           nullable: true
+    CryptoInstrument:
+      type: object
+      required:
+      - instrumentType
+      - asset
+      - network
+      properties:
+        instrumentType:
+          type: string
+          enum:
+          - crypto
+        asset:
+          type: string
+          description: Asset ticker, e.g. BTC.
+        network:
+          type: string
+          description: Settlement network.
+        walletAddressLast6:
+          type: string
+          nullable: true
+          description: Last six characters of the destination address.
+    RiskAssessment:
+      type: object
+      required:
+      - score
+      properties:
+        score:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 100
+          description: Risk score, higher is riskier.
+        rulesTriggered:
+          type: array
+          items:
+            type: string
+          description: Identifiers of the risk rules that fired.
+    BankAccountDestination:
+      type: object
+      required:
+      - destinationType
+      - accountLast4
+      properties:
+        destinationType:
+          type: string
+          enum:
+          - bank_account
+        accountLast4:
+          type: string
+          minLength: 4
+          maxLength: 4
+    CardDestination:
+      type: object
+      required:
+      - destinationType
+      - last4
+      properties:
+        destinationType:
+          type: string
+          enum:
+          - card
+        last4:
+          type: string
+          minLength: 4
+          maxLength: 4
+    PayoutDestination:
+      description: Where a payout is sent.
+      oneOf:
+      - $ref: '#/components/schemas/BankAccountDestination'
+      - $ref: '#/components/schemas/CardDestination'
+      discriminator:
+        propertyName: destinationType
+        mapping:
+          bank_account: '#/components/schemas/BankAccountDestination'
+          card: '#/components/schemas/CardDestination'
+    CreatePayoutRequest:
+      type: object
+      required:
+      - amount
+      - destination
+      properties:
+        amount:
+          $ref: '#/components/schemas/Money'
+        destination:
+          $ref: '#/components/schemas/PayoutDestination'
+    Payout:
+      type: object
+      required:
+      - id
+      - amount
+      - destination
+      - createdAt
+      properties:
+        id:
+          type: string
+        amount:
+          $ref: '#/components/schemas/Money'
+        destination:
+          $ref: '#/components/schemas/PayoutDestination'
+        createdAt:
+          type: string
+          format: date-time
