@@ -1,13 +1,19 @@
 {
   "sdkGenVersion": "2.0.0",
-  "date": "2026-08-03T04:39:06.831Z",
+  "date": "2026-08-03T04:54:44.525Z",
   "config": {
+    "sdkVersion": "1.0.0",
     "languages": [
       "typescript"
     ],
     "deliveryMethods": [
       "zip"
     ],
+    "sdkName": "payments-api-sdk",
+    "specLocation": {
+      "bucketName": "us-prod-sdk-gen-api-specs",
+      "bucketKey": "specification-snapshots/9e1f61e5-b8f7-42d4-9f78-7b1fb30ec978/1785732883998.json"
+    },
     "languageOptions": {
       "python": {
         "alwaysInitializeOptionals": false,
@@ -58,16 +64,11 @@
         "liblabVersion": "2"
       }
     },
-    "includeWatermark": false,
-    "responseHeaders": false,
-    "sdkName": "payments-api-sdk",
-    "sdkVersion": "1.0.0",
-    "specLocation": {
-      "bucketName": "us-prod-sdk-gen-api-specs",
-      "bucketKey": "specification-snapshots/9e1f61e5-b8f7-42d4-9f78-7b1fb30ec978/1785731946300.yaml"
-    },
     "customCode": {
       "trackChanges": true
+    },
+    "publishing": {
+      "releaseBranch": "main"
     },
     "httpClient": "fetch",
     "bundle": true,
@@ -138,6 +139,7 @@
     "ai": false,
     "fernMode": false,
     "includeOptionalSnippetParameters": true,
+    "responseHeaders": false,
     "specType": "openapi",
     "deprecatedOperations": {
       "include": true
@@ -246,16 +248,16 @@
     "documentation/models/Currency.md": "22c32dd31c5483ae2926401560c28de7f83cf531e79377e13b691964f571066f",
     "documentation/models/Error.md": "5933b7a0f4880b2553477958685472cba483ee85a89d669b0f5640d41d030f25",
     "documentation/models/Money.md": "1022e84871c2c70dc82d11789cff4480255a44cecb744f4def90cf27310c92fa",
-    "documentation/models/Payment.md": "ea409a14ea93b3916cb2cdd97e75569e297b9330b45c7a6c9e0fbb1044f0724a",
+    "documentation/models/Payment.md": "7a3a272a77b2c68d5a3e254e6a9b9e7bd86716d722f1beff74507a7d1e852b12",
     "documentation/models/PaymentInstrument.md": "48ce242ada1273c8c728c07d51ef2fc1ba7eb285dd54e9b12d2d023584578a9a",
     "documentation/models/PaymentPage.md": "72de4338cffc1a2975f1f6c663894709f42e487048e32d8038113a8a289174d0",
     "documentation/models/PaymentStatus.md": "148f5c85eaa1c6c52c5c7fff37869845c29040b01e8469b86f803f3693d77c80",
     "documentation/models/Refund.md": "eae2d70844899e70a2618825ed2b6ddf3b29f0ca876a35dedc67f3bc579d457b",
     "documentation/models/WalletInstrument.md": "59c73b8e480249a5c0664ec2effdd16952265bc0197cf6c7bcaba63896aced14",
     "documentation/models/WalletProvider.md": "2276b71d941451b8dd7b4bd533460e4522af224805106c8e7ff42a68d1be5511",
-    "documentation/services/PaymentsService.md": "bd02049324dfab93256a29aca23ad1cc54b8c01f4d37ce75618aa99119087bd6",
-    "documentation/services/RefundsService.md": "7a165334f5d546da252351281256388c932a1b7c73b754e03155c43ee3b3e0ac",
-    "documentation/snippets/snippets.json": "8a1855294c6afdb86f96d64cb55557c3525a0d4fdca8e3c48de3a1a12e72fd9b",
+    "documentation/services/PaymentsService.md": "a156d5a7ab6a90c3862ec3f54a11d98692732a198eaa93af422f63fc03a94933",
+    "documentation/services/RefundsService.md": "085315f5c2f620e9e373c20a39fafff28d3ea3df86e38703763d06a5edfec8d7",
+    "documentation/snippets/snippets.json": "f281fa96ba44292e4e757af8ff889c183feb0190f40e469ba46a0cd18d389122",
     "examples/README.md": "2b020e2e88af115076ae5e1dcba76dd7c62bf42d07f9ad4be0e162e922d1f7f0",
     "examples/package.json": "1a3f399a2a55efda2581b36d10c069b96a419e088fd75141aee4b86ddf0081a1",
     "examples/src/index.ts": "0a24dac0b4215067070fd7ca8a6a6b4ba5446768ed389573fd8eede824b45413",
@@ -308,7 +310,7 @@
     "src/services/payments/models/payment-instrument.ts": "2fb8942939ba8526f6f89c3c321d4155e3037ba0359cc84ee9af0614e2e83010",
     "src/services/payments/models/payment-page.ts": "82ae8dfecfe5f709e38108225439dce2f04a72019ed1bda2ebeda1a4725e0736",
     "src/services/payments/models/payment-status.ts": "1fb8a4ab2376f043df6eb74bc4213d7691dd2d33ae4da6d08a372029b0e1a78f",
-    "src/services/payments/models/payment.ts": "5861caf35cb5fb8e0cc13d23e3558996c7daeaf5d3c50352d8b16584eabf092b",
+    "src/services/payments/models/payment.ts": "f7d932d85785f5c8206e8b9aafc0ec87a1f2554c093233db1aa26c86692f9001",
     "src/services/payments/models/wallet-instrument-instrument-type.ts": "ef1cf376ed4ed6401956c3af40230114662c219e59d2245375489656848ae1b3",
     "src/services/payments/models/wallet-instrument.ts": "10450349f16a9aee1727b3b3de49e611ff135b73271111709f5645802277b91f",
     "src/services/payments/models/wallet-provider.ts": "1c7624e50bed2208d96a121edad3190ff4856a818db14740417e2a377327afd6",

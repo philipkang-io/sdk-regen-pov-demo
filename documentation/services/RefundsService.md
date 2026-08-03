@@ -37,7 +37,7 @@ import { CreateRefundRequest, Money, PaymentsApiSdk } from 'payments-api-sdk';
   const currency = 'USD';
 
   const money: Money = {
-    amountMinor: 3,
+    amountMinor: 8,
     currency: currency,
   };
 

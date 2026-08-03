@@ -22,6 +22,7 @@ export const payment = z.lazy(() => {
     description: z.string().optional().nullable(),
     createdAt: z.string(),
     capturedAt: z.string().optional().nullable(),
+    merchantReference: z.string().optional().nullable(),
   });
 });
 
@@ -35,6 +36,7 @@ export const payment = z.lazy(() => {
  * @property {string}
  * @property {string}
  * @property {string} - When the payment was captured. Null until capture.
+ * @property {string} - Merchant's own reference for this payment.
  */
 export type Payment = z.infer<typeof payment>;
 
@@ -53,6 +55,7 @@ export const paymentResponse = z.lazy(() => {
       description: z.string().optional().nullable(),
       createdAt: z.string(),
       capturedAt: z.string().optional().nullable(),
+      merchantReference: z.string().optional().nullable(),
     })
     .transform((data) => ({
       id: data['id'],
@@ -62,6 +65,7 @@ export const paymentResponse = z.lazy(() => {
       description: data['description'],
       createdAt: data['createdAt'],
       capturedAt: data['capturedAt'],
+      merchantReference: data['merchantReference'],
     }));
 });
 
@@ -80,6 +84,7 @@ export const paymentRequest = z.lazy(() => {
       description: z.string().optional().nullable(),
       createdAt: z.string(),
       capturedAt: z.string().optional().nullable(),
+      merchantReference: z.string().optional().nullable(),
     })
     .transform((data) => ({
       id: data['id'],
@@ -89,5 +94,6 @@ export const paymentRequest = z.lazy(() => {
       description: data['description'],
       createdAt: data['createdAt'],
       capturedAt: data['capturedAt'],
+      merchantReference: data['merchantReference'],
     }));
 });
