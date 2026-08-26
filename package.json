@@ -1,6 +1,6 @@
 {
   "name": "payments-api-sdk",
-  "version": "1.0.0",
+  "version": "5.0.0",
   "description": "Reference payments API used to demonstrate SDK generation and regeneration safety. Deliberately includes a discriminated union (paymentInstrument) because polymorphism is where SDK generators most often fail.",
   "source": "./src/index.ts",
   "main": "./dist/index.js",

@@ -17,13 +17,12 @@ export const refund = z.lazy(() => {
 });
 
 /**
- *
- * @typedef  {Refund} refund
- * @property {string}
- * @property {string}
- * @property {Money}
- * @property {string}
- * @property {string}
+ * @typedef {Refund} refund
+ * @property {string} id
+ * @property {string} paymentId
+ * @property {Money} amount
+ * @property {string} reason
+ * @property {string} createdAt
  */
 export type Refund = z.infer<typeof refund>;
 

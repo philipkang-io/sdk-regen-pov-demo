@@ -1,10 +1,10 @@
-# PaymentsApiSdk TypeScript SDK 1.0.0
+# PaymentsApiSdk TypeScript SDK 5.0.0
 
 Welcome to the PaymentsApiSdk SDK documentation. This guide will help you get started with integrating and using the PaymentsApiSdk SDK in your project.
 
 ## Versions
 
-- SDK version: `1.0.0`
+- SDK version: `5.0.0`
 
 ## About the API
 

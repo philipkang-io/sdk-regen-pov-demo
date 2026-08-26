@@ -22,14 +22,13 @@ export const cardInstrument = z.lazy(() => {
 });
 
 /**
- *
- * @typedef  {CardInstrument} cardInstrument
- * @property {CardInstrumentInstrumentType}
- * @property {string} - Last four digits of the card number.
- * @property {CardBrand} - Card network.
- * @property {number}
- * @property {number}
- * @property {string} - Cardholder name as printed. Absent for tokenized cards.
+ * @typedef {CardInstrument} cardInstrument
+ * @property {CardInstrumentInstrumentType} instrumentType
+ * @property {string} last4 - Last four digits of the card number.
+ * @property {CardBrand} brand - Card network.
+ * @property {number} expiryMonth
+ * @property {number} expiryYear
+ * @property {string} holderName - Cardholder name as printed. Absent for tokenized cards.
  */
 export type CardInstrument = z.infer<typeof cardInstrument>;
 
