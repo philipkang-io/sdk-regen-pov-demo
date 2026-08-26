@@ -14,10 +14,9 @@ export const createRefundRequest = z.lazy(() => {
 });
 
 /**
- *
- * @typedef  {CreateRefundRequest} createRefundRequest
- * @property {Money}
- * @property {string} - Operator-supplied reason for the refund.
+ * @typedef {CreateRefundRequest} createRefundRequest
+ * @property {Money} amount
+ * @property {string} reason - Operator-supplied reason for the refund.
  */
 export type CreateRefundRequest = z.infer<typeof createRefundRequest>;
 

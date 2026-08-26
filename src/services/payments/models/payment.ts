@@ -26,15 +26,14 @@ export const payment = z.lazy(() => {
 });
 
 /**
- *
- * @typedef  {Payment} payment
- * @property {string}
- * @property {PaymentStatus} - Lifecycle state of a payment.
- * @property {Money}
- * @property {PaymentInstrument} - A means of payment. The concrete shape is selected by the instrumentType discriminator.
- * @property {string}
- * @property {string}
- * @property {string} - When the payment was captured. Null until capture.
+ * @typedef {Payment} payment
+ * @property {string} id
+ * @property {PaymentStatus} status - Lifecycle state of a payment.
+ * @property {Money} amount
+ * @property {PaymentInstrument} instrument - A means of payment. The concrete shape is selected by the instrumentType discriminator.
+ * @property {string} description
+ * @property {string} createdAt
+ * @property {string} capturedAt - When the payment was captured. Null until capture.
  */
 export type Payment = z.infer<typeof payment>;
 

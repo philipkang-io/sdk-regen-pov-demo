@@ -19,11 +19,10 @@ export const walletInstrument = z.lazy(() => {
 });
 
 /**
- *
- * @typedef  {WalletInstrument} walletInstrument
- * @property {WalletInstrumentInstrumentType}
- * @property {WalletProvider} - Wallet provider.
- * @property {string} - Masked wallet account handle.
+ * @typedef {WalletInstrument} walletInstrument
+ * @property {WalletInstrumentInstrumentType} instrumentType
+ * @property {WalletProvider} provider - Wallet provider.
+ * @property {string} accountHandle - Masked wallet account handle.
  */
 export type WalletInstrument = z.infer<typeof walletInstrument>;
 

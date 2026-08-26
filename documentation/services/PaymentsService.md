@@ -79,7 +79,7 @@ import { CardInstrument, CreatePaymentRequest, Money, PaymentsApiSdk } from 'pay
   const currency = 'USD';
 
   const money: Money = {
-    amountMinor: 3,
+    amountMinor: 10,
     currency: currency,
   };
 
@@ -89,10 +89,10 @@ import { CardInstrument, CreatePaymentRequest, Money, PaymentsApiSdk } from 'pay
 
   const cardInstrument: CardInstrument = {
     instrumentType: cardInstrumentInstrumentType,
-    last4: 'Ut c',
+    last4: 'enim',
     brand: cardBrand,
-    expiryMonth: 7,
-    expiryYear: 9,
+    expiryMonth: 4,
+    expiryYear: 5,
     holderName: 'holderName',
   };
 

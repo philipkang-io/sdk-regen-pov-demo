@@ -19,12 +19,11 @@ export const bankTransferInstrument = z.lazy(() => {
 });
 
 /**
- *
- * @typedef  {BankTransferInstrument} bankTransferInstrument
- * @property {BankTransferInstrumentInstrumentType}
- * @property {string}
- * @property {string}
- * @property {string} - Direct-debit mandate reference, when one exists.
+ * @typedef {BankTransferInstrument} bankTransferInstrument
+ * @property {BankTransferInstrumentInstrumentType} instrumentType
+ * @property {string} accountLast4
+ * @property {string} bankName
+ * @property {string} mandateReference - Direct-debit mandate reference, when one exists.
  */
 export type BankTransferInstrument = z.infer<typeof bankTransferInstrument>;
 

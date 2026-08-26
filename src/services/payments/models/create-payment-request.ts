@@ -22,12 +22,11 @@ export const createPaymentRequest = z.lazy(() => {
 });
 
 /**
- *
- * @typedef  {CreatePaymentRequest} createPaymentRequest
- * @property {Money}
- * @property {PaymentInstrument} - A means of payment. The concrete shape is selected by the instrumentType discriminator.
- * @property {string} - Free-text description shown on the customer statement.
- * @property {string} - Client-supplied key to make retries safe.
+ * @typedef {CreatePaymentRequest} createPaymentRequest
+ * @property {Money} amount
+ * @property {PaymentInstrument} instrument - A means of payment. The concrete shape is selected by the instrumentType discriminator.
+ * @property {string} description - Free-text description shown on the customer statement.
+ * @property {string} idempotencyKey - Client-supplied key to make retries safe.
  */
 export type CreatePaymentRequest = z.infer<typeof createPaymentRequest>;
 

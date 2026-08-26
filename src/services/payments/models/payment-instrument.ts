@@ -22,10 +22,7 @@ export const paymentInstrument = z.lazy(() => {
 
 /**
  * A means of payment. The concrete shape is selected by the instrumentType discriminator.
- * @typedef  {PaymentInstrument} paymentInstrument - A means of payment. The concrete shape is selected by the instrumentType discriminator. - A means of payment. The concrete shape is selected by the instrumentType discriminator.
- * @property {CardInstrument}
- * @property {BankTransferInstrument}
- * @property {WalletInstrument}
+ * @typedef {PaymentInstrument} paymentInstrument
  */
 export type PaymentInstrument = z.infer<typeof paymentInstrument>;
 

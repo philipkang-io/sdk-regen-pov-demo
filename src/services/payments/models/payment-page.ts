@@ -14,10 +14,9 @@ export const paymentPage = z.lazy(() => {
 });
 
 /**
- *
- * @typedef  {PaymentPage} paymentPage
- * @property {Payment[]}
- * @property {string} - Cursor for the next page, or null on the last page.
+ * @typedef {PaymentPage} paymentPage
+ * @property {Payment[]} data
+ * @property {string} nextCursor - Cursor for the next page, or null on the last page.
  */
 export type PaymentPage = z.infer<typeof paymentPage>;
 

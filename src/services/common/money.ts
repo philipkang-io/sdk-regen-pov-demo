@@ -14,10 +14,9 @@ export const money = z.lazy(() => {
 });
 
 /**
- *
- * @typedef  {Money} money
- * @property {number} - Amount in the minor unit of the currency (e.g. cents).
- * @property {Currency} - ISO 4217 currency code.
+ * @typedef {Money} money
+ * @property {number} amountMinor - Amount in the minor unit of the currency (e.g. cents).
+ * @property {Currency} currency - ISO 4217 currency code.
  */
 export type Money = z.infer<typeof money>;
 
